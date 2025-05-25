@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="export jar" name="Maia Utils">
+    <target name="export jar">
+        <jar destfile="${libraries.home}/maiaUtils/maiaUtils.jar">
+            <fileset dir="bin"/>
+        </jar>
+    </target>
+</project>
