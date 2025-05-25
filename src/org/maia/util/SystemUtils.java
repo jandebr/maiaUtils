@@ -1,12 +1,41 @@
 package org.maia.util;
 
+import java.lang.management.ManagementFactory;
 import java.util.Map;
 
 import javax.swing.SwingUtilities;
 
+import com.sun.management.OperatingSystemMXBean;
+
 public class SystemUtils {
 
 	private SystemUtils() {
+	}
+
+	@SuppressWarnings("deprecation")
+	public static double getCpuLoad() {
+		OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
+		return Math.max(0, osBean.getSystemCpuLoad());
+	}
+
+	public static long getTotalMemoryInBytes() {
+		return Runtime.getRuntime().totalMemory();
+	}
+
+	public static long getFreeMemoryInBytes() {
+		return Runtime.getRuntime().freeMemory();
+	}
+
+	public static long getUsedMemoryInBytes() {
+		return getTotalMemoryInBytes() - getFreeMemoryInBytes();
+	}
+
+	public static void runOutsideAwtEventDispatchThread(Runnable task) {
+		if (SwingUtilities.isEventDispatchThread()) {
+			new Thread(task).start();
+		} else {
+			task.run();
+		}
 	}
 
 	public static void sleep(long milliseconds) {
@@ -27,12 +56,12 @@ public class SystemUtils {
 		}
 	}
 
-	public static void runOutsideAwtEventDispatchThread(Runnable task) {
-		if (SwingUtilities.isEventDispatchThread()) {
-			new Thread(task).start();
-		} else {
-			task.run();
-		}
+	public static void releaseMemory() {
+		System.gc();
+	}
+
+	public static void exit() {
+		System.exit(0);
 	}
 
 	public static void printAllStackTraces() {
