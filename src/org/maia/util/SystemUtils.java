@@ -30,6 +30,10 @@ public class SystemUtils {
 		return getTotalMemoryInBytes() - getFreeMemoryInBytes();
 	}
 
+	public static long getMaxMemoryInBytes() {
+		return Runtime.getRuntime().maxMemory();
+	}
+
 	public static void runOutsideAwtEventDispatchThread(Runnable task) {
 		if (SwingUtilities.isEventDispatchThread()) {
 			new Thread(task).start();
