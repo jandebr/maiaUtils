@@ -12,57 +12,55 @@ public class ColorUtils {
 	private ColorUtils() {
 	}
 
-	public static double getHue(Color color) {
+	public static float getHue(Color color) {
 		Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsbComps);
 		return hsbComps[0];
 	}
 
-	public static double getSaturation(Color color) {
+	public static float getSaturation(Color color) {
 		Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsbComps);
 		return hsbComps[1];
 	}
 
-	public static double getBrightness(Color color) {
+	public static float getBrightness(Color color) {
 		Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsbComps);
 		return hsbComps[2];
 	}
 
-	public static Color adjustBrightness(Color color, double factor) {
+	public static Color adjustBrightness(Color color, float factor) {
 		if (factor == 0)
 			return color;
 		Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsbComps);
-		double brightness = hsbComps[2];
-		double darkness = 1.0 - brightness;
+		float brightness = hsbComps[2];
+		float darkness = 1f - brightness;
 		if (factor >= 0) {
 			// increase brightness
-			brightness = 1.0 - darkness * (1.0 - factor);
+			brightness = 1f - darkness * (1f - factor);
 		} else {
 			// increase darkness
-			darkness = 1.0 - brightness * (1.0 + factor);
-			brightness = 1.0 - darkness;
+			darkness = 1f - brightness * (1f + factor);
+			brightness = 1f - darkness;
 		}
 		int rgba = (color.getAlpha() << 24)
-				| (Color.HSBtoRGB(hsbComps[0], hsbComps[1] * (float) (Math.min(1.0, 1.0 - factor)), (float) brightness)
-						& 0x00ffffff);
+				| (Color.HSBtoRGB(hsbComps[0], hsbComps[1] * Math.min(1f, 1f - factor), brightness) & 0x00ffffff);
 		return new Color(rgba, true);
 	}
 
-	public static Color adjustSaturation(Color color, double factor) {
+	public static Color adjustSaturation(Color color, float factor) {
 		if (factor == 0)
 			return color;
 		Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsbComps);
-		double saturation = hsbComps[1];
-		double grayness = 1.0 - saturation;
+		float saturation = hsbComps[1];
+		float grayness = 1f - saturation;
 		if (factor >= 0) {
 			// increase saturation
-			saturation = 1.0 - grayness * (1.0 - factor);
+			saturation = 1f - grayness * (1f - factor);
 		} else {
 			// increase grayness
-			grayness = 1.0 - saturation * (1.0 + factor);
-			saturation = 1.0 - grayness;
+			grayness = 1f - saturation * (1f + factor);
+			saturation = 1f - grayness;
 		}
-		int rgba = (color.getAlpha() << 24)
-				| (Color.HSBtoRGB(hsbComps[0], (float) saturation, hsbComps[2]) & 0x00ffffff);
+		int rgba = (color.getAlpha() << 24) | (Color.HSBtoRGB(hsbComps[0], saturation, hsbComps[2]) & 0x00ffffff);
 		return new Color(rgba, true);
 	}
 
@@ -74,11 +72,11 @@ public class ColorUtils {
 		return color.getAlpha() == 255;
 	}
 
-	public static double getTransparency(Color color) {
-		return 1.0 - color.getAlpha() / 255.0;
+	public static float getTransparency(Color color) {
+		return 1f - color.getAlpha() / 255f;
 	}
 
-	public static Color setTransparency(Color color, double transparency) {
+	public static Color setTransparency(Color color, float transparency) {
 		if (transparency == 0) {
 			if (color.getAlpha() == 255) {
 				return color;
@@ -93,7 +91,7 @@ public class ColorUtils {
 			}
 		} else {
 			color.getRGBColorComponents(rgbaComps);
-			rgbaComps[3] = (float) (1.0 - transparency);
+			rgbaComps[3] = 1f - transparency;
 			return new Color(rgbaComps[0], rgbaComps[1], rgbaComps[2], rgbaComps[3]);
 		}
 	}
@@ -113,22 +111,22 @@ public class ColorUtils {
 	public static Color combineByTransparency(Color frontColor, Color backColor) {
 		if (isFullyOpaque(frontColor))
 			return frontColor;
-		double alpha = frontColor.getAlpha() / 255.0;
-		double beta = 1.0 - alpha;
-		double gamma = 1.0 - backColor.getAlpha() / 255.0;
-		int red = (int) Math.round(alpha * frontColor.getRed() + beta * backColor.getRed());
-		int green = (int) Math.round(alpha * frontColor.getGreen() + beta * backColor.getGreen());
-		int blue = (int) Math.round(alpha * frontColor.getBlue() + beta * backColor.getBlue());
-		int al = (int) Math.round(255.0 * (1.0 - beta * gamma));
+		float alpha = frontColor.getAlpha() / 255f;
+		float beta = 1f - alpha;
+		float gamma = 1f - backColor.getAlpha() / 255f;
+		int red = Math.round(alpha * frontColor.getRed() + beta * backColor.getRed());
+		int green = Math.round(alpha * frontColor.getGreen() + beta * backColor.getGreen());
+		int blue = Math.round(alpha * frontColor.getBlue() + beta * backColor.getBlue());
+		int al = Math.round(255f * (1f - beta * gamma));
 		return new Color(red, green, blue, al);
 	}
 
-	public static Color interpolate(Color from, Color to, double ratio) {
-		double rev = 1.0 - ratio;
-		int red = (int) Math.round(rev * from.getRed() + ratio * to.getRed());
-		int green = (int) Math.round(rev * from.getGreen() + ratio * to.getGreen());
-		int blue = (int) Math.round(rev * from.getBlue() + ratio * to.getBlue());
-		int alpha = (int) Math.round(rev * from.getAlpha() + ratio * to.getAlpha());
+	public static Color interpolate(Color from, Color to, float ratio) {
+		float rev = 1f - ratio;
+		int red = Math.round(rev * from.getRed() + ratio * to.getRed());
+		int green = Math.round(rev * from.getGreen() + ratio * to.getGreen());
+		int blue = Math.round(rev * from.getBlue() + ratio * to.getBlue());
+		int alpha = Math.round(rev * from.getAlpha() + ratio * to.getAlpha());
 		return new Color(red, green, blue, alpha);
 	}
 
