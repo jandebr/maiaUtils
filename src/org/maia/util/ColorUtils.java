@@ -109,25 +109,34 @@ public class ColorUtils {
 	}
 
 	public static Color combineByTransparency(Color frontColor, Color backColor) {
-		if (isFullyOpaque(frontColor))
-			return frontColor;
-		float alpha = frontColor.getAlpha() / 255f;
-		float beta = 1f - alpha;
-		float gamma = 1f - backColor.getAlpha() / 255f;
-		int red = Math.round(alpha * frontColor.getRed() + beta * backColor.getRed());
-		int green = Math.round(alpha * frontColor.getGreen() + beta * backColor.getGreen());
-		int blue = Math.round(alpha * frontColor.getBlue() + beta * backColor.getBlue());
-		int al = Math.round(255f * (1f - beta * gamma));
-		return new Color(red, green, blue, al);
+		return new Color(combineByTransparency(frontColor.getRGB(), backColor.getRGB()), true);
+	}
+
+	public static int combineByTransparency(int frontColorRgb, int backColorRgb) {
+		int frontAlpha = frontColorRgb >>> 24;
+		if (frontAlpha == 255) {
+			return frontColorRgb;
+		} else {
+			float alpha = frontAlpha / 255f;
+			float beta = 1f - alpha;
+			float gamma = 1f - (backColorRgb >>> 24) / 255f;
+			int rgb = interpolate(frontColorRgb, backColorRgb, beta) & 0x00ffffff;
+			int al = Math.round(255f * (1f - beta * gamma));
+			return al << 24 | rgb;
+		}
 	}
 
 	public static Color interpolate(Color from, Color to, float ratio) {
+		return new Color(interpolate(from.getRGB(), to.getRGB(), ratio), true);
+	}
+
+	public static int interpolate(int fromRgb, int toRgb, float ratio) {
 		float rev = 1f - ratio;
-		int red = Math.round(rev * from.getRed() + ratio * to.getRed());
-		int green = Math.round(rev * from.getGreen() + ratio * to.getGreen());
-		int blue = Math.round(rev * from.getBlue() + ratio * to.getBlue());
-		int alpha = Math.round(rev * from.getAlpha() + ratio * to.getAlpha());
-		return new Color(red, green, blue, alpha);
+		int alpha = Math.round(rev * ((fromRgb & 0xff000000) >>> 24) + ratio * ((toRgb & 0xff000000) >>> 24));
+		int red = Math.round(rev * ((fromRgb & 0xff0000) >>> 16) + ratio * ((toRgb & 0xff0000) >>> 16));
+		int green = Math.round(rev * ((fromRgb & 0xff00) >>> 8) + ratio * ((toRgb & 0xff00) >>> 8));
+		int blue = Math.round(rev * (fromRgb & 0xff) + ratio * (toRgb & 0xff));
+		return alpha << 24 | red << 16 | green << 8 | blue;
 	}
 
 }
