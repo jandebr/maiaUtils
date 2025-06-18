@@ -13,17 +13,29 @@ public class ColorUtils {
 	}
 
 	public static float getHue(Color color) {
-		Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsbComps);
+		return getHue(color.getRGB());
+	}
+
+	public static float getHue(int rgb) {
+		Color.RGBtoHSB((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, hsbComps);
 		return hsbComps[0];
 	}
 
 	public static float getSaturation(Color color) {
-		Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsbComps);
+		return getSaturation(color.getRGB());
+	}
+
+	public static float getSaturation(int rgb) {
+		Color.RGBtoHSB((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, hsbComps);
 		return hsbComps[1];
 	}
 
 	public static float getBrightness(Color color) {
-		Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsbComps);
+		return getBrightness(color.getRGB());
+	}
+
+	public static float getBrightness(int rgb) {
+		Color.RGBtoHSB((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, hsbComps);
 		return hsbComps[2];
 	}
 
