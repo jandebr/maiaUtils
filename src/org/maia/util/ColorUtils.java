@@ -40,9 +40,13 @@ public class ColorUtils {
 	}
 
 	public static Color adjustBrightness(Color color, float factor) {
-		if (factor == 0)
-			return color;
-		Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsbComps);
+		return new Color(adjustBrightness(color.getRGB(), factor), true);
+	}
+
+	public static int adjustBrightness(int rgb, float factor) {
+		if (factor == 0f)
+			return rgb;
+		Color.RGBtoHSB((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, hsbComps);
 		float brightness = hsbComps[2];
 		float darkness = 1f - brightness;
 		if (factor >= 0) {
@@ -53,15 +57,18 @@ public class ColorUtils {
 			darkness = 1f - brightness * (1f + factor);
 			brightness = 1f - darkness;
 		}
-		int rgba = (color.getAlpha() << 24)
+		return (rgb & 0xff000000)
 				| (Color.HSBtoRGB(hsbComps[0], hsbComps[1] * Math.min(1f, 1f - factor), brightness) & 0x00ffffff);
-		return new Color(rgba, true);
 	}
 
 	public static Color adjustSaturation(Color color, float factor) {
-		if (factor == 0)
-			return color;
-		Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsbComps);
+		return new Color(adjustSaturation(color.getRGB(), factor), true);
+	}
+
+	public static int adjustSaturation(int rgb, float factor) {
+		if (factor == 0f)
+			return rgb;
+		Color.RGBtoHSB((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, hsbComps);
 		float saturation = hsbComps[1];
 		float grayness = 1f - saturation;
 		if (factor >= 0) {
@@ -72,8 +79,46 @@ public class ColorUtils {
 			grayness = 1f - saturation * (1f + factor);
 			saturation = 1f - grayness;
 		}
-		int rgba = (color.getAlpha() << 24) | (Color.HSBtoRGB(hsbComps[0], saturation, hsbComps[2]) & 0x00ffffff);
-		return new Color(rgba, true);
+		return (rgb & 0xff000000) | (Color.HSBtoRGB(hsbComps[0], saturation, hsbComps[2]) & 0x00ffffff);
+	}
+
+	public static Color adjustSaturationAndBrightness(Color color, float saturationFactor, float brightnessFactor) {
+		return new Color(adjustSaturationAndBrightness(color.getRGB(), saturationFactor, brightnessFactor), true);
+	}
+
+	public static int adjustSaturationAndBrightness(int rgb, float saturationFactor, float brightnessFactor) {
+		if (saturationFactor != 0f || brightnessFactor != 0f) {
+			Color.RGBtoHSB((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, hsbComps);
+			if (saturationFactor != 0f) {
+				float saturation = hsbComps[1];
+				float grayness = 1f - saturation;
+				if (saturationFactor >= 0) {
+					// increase saturation
+					saturation = 1f - grayness * (1f - saturationFactor);
+				} else {
+					// increase grayness
+					grayness = 1f - saturation * (1f + saturationFactor);
+					saturation = 1f - grayness;
+				}
+				hsbComps[1] = saturation;
+			}
+			if (brightnessFactor != 0f) {
+				float brightness = hsbComps[2];
+				float darkness = 1f - brightness;
+				if (brightnessFactor >= 0) {
+					// increase brightness
+					brightness = 1f - darkness * (1f - brightnessFactor);
+				} else {
+					// increase darkness
+					darkness = 1f - brightness * (1f + brightnessFactor);
+					brightness = 1f - darkness;
+				}
+				hsbComps[1] *= Math.min(1f, 1f - brightnessFactor);
+				hsbComps[2] = brightness;
+			}
+			rgb = (rgb & 0xff000000) | (Color.HSBtoRGB(hsbComps[0], hsbComps[1], hsbComps[2]) & 0x00ffffff);
+		}
+		return rgb;
 	}
 
 	public static boolean isFullyTransparent(Color color) {
@@ -85,27 +130,26 @@ public class ColorUtils {
 	}
 
 	public static float getTransparency(Color color) {
-		return 1f - color.getAlpha() / 255f;
+		return getTransparency(color.getRGB());
+	}
+
+	public static float getTransparency(int rgb) {
+		return 1f - ((rgb >>> 24) & 0xff) / 255f;
 	}
 
 	public static Color setTransparency(Color color, float transparency) {
-		if (transparency == 0) {
-			if (color.getAlpha() == 255) {
-				return color;
-			} else {
-				return new Color(color.getRGB() | 0xff000000, true);
-			}
-		} else if (transparency == 1.0) {
-			if (color.getAlpha() == 0) {
-				return color;
-			} else {
-				return new Color(color.getRGB() & 0x00ffffff, true);
-			}
+		if (transparency == 0f && color.getAlpha() == 255) {
+			return color;
+		} else if (transparency == 1f && color.getAlpha() == 0) {
+			return color;
 		} else {
-			color.getRGBColorComponents(rgbaComps);
-			rgbaComps[3] = 1f - transparency;
-			return new Color(rgbaComps[0], rgbaComps[1], rgbaComps[2], rgbaComps[3]);
+			return new Color(setTransparency(color.getRGB(), transparency), true);
 		}
+	}
+
+	public static int setTransparency(int rgb, float transparency) {
+		int alpha = Math.round((1f - transparency) * 255f);
+		return alpha << 24 | (rgb & 0x00ffffff);
 	}
 
 	public static Color combineByTransparency(List<Color> colors) {
