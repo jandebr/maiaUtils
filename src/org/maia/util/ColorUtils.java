@@ -35,8 +35,7 @@ public class ColorUtils {
 	}
 
 	public static float getBrightness(int rgb) {
-		Color.RGBtoHSB((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, hsbComps);
-		return hsbComps[2];
+		return Math.max(Math.max((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff), rgb & 0xff) / 255f;
 	}
 
 	public static Color adjustBrightness(Color color, float factor) {
