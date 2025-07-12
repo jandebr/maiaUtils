@@ -65,8 +65,9 @@ public class AsyncSerialTaskWorker<T extends AsyncTask> extends Thread {
 		task.process();
 	}
 
-	public void stopProcessing() {
+	public synchronized void stopProcessing() {
 		stop = true;
+		notify();
 	}
 
 	public boolean isStopped() {
