@@ -51,6 +51,14 @@ public class Randomizer {
 		}
 	}
 
+	public double drawGaussian() {
+		return getRandomNumberGenerator().nextGaussian();
+	}
+
+	public double drawGaussian(double mean, double standardDeviation) {
+		return getRandomNumberGenerator().nextGaussian(mean, standardDeviation);
+	}
+
 	public void shuffle(List<?> list) {
 		Collections.shuffle(list, getRandomNumberGenerator());
 	}
