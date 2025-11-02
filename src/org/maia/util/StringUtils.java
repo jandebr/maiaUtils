@@ -226,4 +226,44 @@ public class StringUtils {
 		return str.toLowerCase().contains(substring.toLowerCase());
 	}
 
+	public static String extractJsonUnquotedSimpleValue(String json, String key) {
+		return extractJsonUnquotedSimpleValue(json, key, 0);
+	}
+
+	public static String extractJsonUnquotedSimpleValue(String json, String key, int fromIndex) {
+		String value = null;
+		String cue = "\"" + key + "\":";
+		int i = json.indexOf(cue, fromIndex);
+		if (i >= 0) {
+			i += cue.length();
+			int j1 = json.indexOf(',', i);
+			int j2 = json.indexOf('}', i);
+			int j = (j1 >= 0 && j2 >= 0) ? Math.min(j1, j2) : Math.max(j1, j2);
+			if (j >= 0) {
+				value = json.substring(i, j);
+			}
+		}
+		return value;
+	}
+
+	public static String extractJsonQuotedStringValue(String json, String key) {
+		return extractJsonQuotedStringValue(json, key, 0);
+	}
+
+	public static String extractJsonQuotedStringValue(String json, String key, int fromIndex) {
+		String value = null;
+		String cue = "\"" + key + "\":\"";
+		int i = json.indexOf(cue, fromIndex);
+		if (i >= 0) {
+			i += cue.length();
+			int j1 = json.indexOf("\",", i);
+			int j2 = json.indexOf("\"}", i);
+			int j = (j1 >= 0 && j2 >= 0) ? Math.min(j1, j2) : Math.max(j1, j2);
+			if (j >= 0) {
+				value = json.substring(i, j);
+			}
+		}
+		return value;
+	}
+
 }
