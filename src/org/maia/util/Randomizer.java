@@ -12,8 +12,8 @@ public class Randomizer {
 		this(new Random());
 	}
 
-	public Randomizer(Object seed) {
-		this(seed.hashCode());
+	public Randomizer(String seed) {
+		this((seed + seed).hashCode());
 	}
 
 	public Randomizer(long seed) {
