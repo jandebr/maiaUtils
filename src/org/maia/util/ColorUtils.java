@@ -21,6 +21,16 @@ public class ColorUtils {
 		return hsbComps[0];
 	}
 
+	public static Color setHue(Color color, float hue) {
+		return new Color(setHue(color.getRGB(), hue), true);
+	}
+
+	public static int setHue(int rgb, float hue) {
+		Color.RGBtoHSB((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, hsbComps);
+		hsbComps[0] = hue;
+		return (rgb & 0xff000000) | (Color.HSBtoRGB(hsbComps[0], hsbComps[1], hsbComps[2]) & 0x00ffffff);
+	}
+
 	public static float getSaturation(Color color) {
 		return getSaturation(color.getRGB());
 	}
@@ -30,12 +40,32 @@ public class ColorUtils {
 		return hsbComps[1];
 	}
 
+	public static Color setSaturation(Color color, float saturation) {
+		return new Color(setSaturation(color.getRGB(), saturation), true);
+	}
+
+	public static int setSaturation(int rgb, float saturation) {
+		Color.RGBtoHSB((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, hsbComps);
+		hsbComps[1] = saturation;
+		return (rgb & 0xff000000) | (Color.HSBtoRGB(hsbComps[0], hsbComps[1], hsbComps[2]) & 0x00ffffff);
+	}
+
 	public static float getBrightness(Color color) {
 		return getBrightness(color.getRGB());
 	}
 
 	public static float getBrightness(int rgb) {
 		return Math.max(Math.max((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff), rgb & 0xff) / 255f;
+	}
+
+	public static Color setBrightness(Color color, float brightness) {
+		return new Color(setBrightness(color.getRGB(), brightness), true);
+	}
+
+	public static int setBrightness(int rgb, float brightness) {
+		Color.RGBtoHSB((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, hsbComps);
+		hsbComps[2] = brightness;
+		return (rgb & 0xff000000) | (Color.HSBtoRGB(hsbComps[0], hsbComps[1], hsbComps[2]) & 0x00ffffff);
 	}
 
 	public static Color adjustBrightness(Color color, float factor) {
