@@ -33,6 +33,11 @@ public class Randomizer {
 		return minInclusive + (int) Math.floor(r * (maxInclusive - minInclusive + 1));
 	}
 
+	public long drawLongIntegerNumber(long minInclusive, long maxInclusive) {
+		float r = getRandomNumberGenerator().nextFloat(); // 0 <= r < 1
+		return minInclusive + (long) Math.floor(r * (maxInclusive - minInclusive + 1L));
+	}
+
 	public float drawFloatUnitNumber() {
 		float r = getRandomNumberGenerator().nextFloat();
 		if (drawBoolean()) {
