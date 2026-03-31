@@ -5,8 +5,6 @@ import java.util.List;
 
 public class ColorUtils {
 
-	private static float[] rgbaComps = new float[4];
-
 	private static float[] hsbComps = new float[3];
 
 	private ColorUtils() {
@@ -16,7 +14,7 @@ public class ColorUtils {
 		return getHue(color.getRGB());
 	}
 
-	public static float getHue(int rgb) {
+	public static synchronized float getHue(int rgb) {
 		Color.RGBtoHSB((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, hsbComps);
 		return hsbComps[0];
 	}
@@ -25,7 +23,7 @@ public class ColorUtils {
 		return new Color(setHue(color.getRGB(), hue), true);
 	}
 
-	public static int setHue(int rgb, float hue) {
+	public static synchronized int setHue(int rgb, float hue) {
 		Color.RGBtoHSB((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, hsbComps);
 		hsbComps[0] = hue;
 		return (rgb & 0xff000000) | (Color.HSBtoRGB(hsbComps[0], hsbComps[1], hsbComps[2]) & 0x00ffffff);
@@ -35,7 +33,7 @@ public class ColorUtils {
 		return getSaturation(color.getRGB());
 	}
 
-	public static float getSaturation(int rgb) {
+	public static synchronized float getSaturation(int rgb) {
 		Color.RGBtoHSB((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, hsbComps);
 		return hsbComps[1];
 	}
@@ -44,7 +42,7 @@ public class ColorUtils {
 		return new Color(setSaturation(color.getRGB(), saturation), true);
 	}
 
-	public static int setSaturation(int rgb, float saturation) {
+	public static synchronized int setSaturation(int rgb, float saturation) {
 		Color.RGBtoHSB((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, hsbComps);
 		hsbComps[1] = saturation;
 		return (rgb & 0xff000000) | (Color.HSBtoRGB(hsbComps[0], hsbComps[1], hsbComps[2]) & 0x00ffffff);
@@ -62,7 +60,7 @@ public class ColorUtils {
 		return new Color(setBrightness(color.getRGB(), brightness), true);
 	}
 
-	public static int setBrightness(int rgb, float brightness) {
+	public static synchronized int setBrightness(int rgb, float brightness) {
 		Color.RGBtoHSB((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, hsbComps);
 		hsbComps[2] = brightness;
 		return (rgb & 0xff000000) | (Color.HSBtoRGB(hsbComps[0], hsbComps[1], hsbComps[2]) & 0x00ffffff);
@@ -72,7 +70,7 @@ public class ColorUtils {
 		return new Color(adjustBrightness(color.getRGB(), factor), true);
 	}
 
-	public static int adjustBrightness(int rgb, float factor) {
+	public static synchronized int adjustBrightness(int rgb, float factor) {
 		if (factor == 0f)
 			return rgb;
 		Color.RGBtoHSB((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, hsbComps);
@@ -94,7 +92,7 @@ public class ColorUtils {
 		return new Color(adjustSaturation(color.getRGB(), factor), true);
 	}
 
-	public static int adjustSaturation(int rgb, float factor) {
+	public static synchronized int adjustSaturation(int rgb, float factor) {
 		if (factor == 0f)
 			return rgb;
 		Color.RGBtoHSB((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, hsbComps);
@@ -115,7 +113,8 @@ public class ColorUtils {
 		return new Color(adjustSaturationAndBrightness(color.getRGB(), saturationFactor, brightnessFactor), true);
 	}
 
-	public static int adjustSaturationAndBrightness(int rgb, float saturationFactor, float brightnessFactor) {
+	public static synchronized int adjustSaturationAndBrightness(int rgb, float saturationFactor,
+			float brightnessFactor) {
 		if (saturationFactor != 0f || brightnessFactor != 0f) {
 			Color.RGBtoHSB((rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff, hsbComps);
 			if (saturationFactor != 0f) {
