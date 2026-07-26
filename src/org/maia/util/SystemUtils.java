@@ -1,7 +1,10 @@
 package org.maia.util;
 
 import java.lang.management.ManagementFactory;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
@@ -69,46 +72,80 @@ public class SystemUtils {
 	}
 
 	public static void printAllStackTraces() {
+		printAllStackTraces(null);
+	}
+
+	public static void printAllStackTraces(StrackTraceFilter filter) {
 		System.out.println("=== STACK TRACES >>");
 		Map<Thread, StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
 		for (Thread thread : stackTraces.keySet()) {
-			String heading = thread.toString();
-			System.out.println(heading);
-			System.out.println(StringUtils.repeat('-', heading.length()));
 			StackTraceElement[] stackTrace = stackTraces.get(thread);
-			for (int i = 0; i < stackTrace.length; i++) {
-				System.out.println(stackTrace[i].toString());
+			if (filter == null || filter.accept(thread, stackTrace)) {
+				String heading = thread.toString();
+				System.out.println(heading);
+				System.out.println(StringUtils.repeat('-', heading.length()));
+				for (int i = 0; i < stackTrace.length; i++) {
+					System.out.println(stackTrace[i].toString());
+				}
+				System.out.println();
+				System.out.println();
 			}
-			System.out.println();
-			System.out.println();
 		}
 		System.out.println("<< STACK TRACES ===");
 	}
 
 	public static void printAllStackTracesPeriodically(int secondsInterval) {
-		new StrackTracePrinter(secondsInterval).start();
+		printAllStackTracesPeriodically(secondsInterval, null);
 	}
 
-	private static class StrackTracePrinter extends Thread {
+	public static void printAllStackTracesPeriodically(int secondsInterval, StrackTraceFilter filter) {
+		Thread t = new Thread(new Runnable() {
 
-		private int secondsInterval;
+			@Override
+			public void run() {
+				while (true) {
+					SystemUtils.sleep(secondsInterval * 1000L);
+					SystemUtils.printAllStackTraces(filter);
+				}
+			}
+		}, "StrackTracePrinter");
+		t.setDaemon(true);
+		t.start();
+	}
 
-		public StrackTracePrinter(int secondsInterval) {
-			super("StrackTracePrinter");
-			setDaemon(true);
-			this.secondsInterval = secondsInterval;
+	public static interface StrackTraceFilter {
+
+		boolean accept(Thread thread, StackTraceElement[] stackTrace);
+
+	}
+
+	public static class PackageStrackTraceFilter implements StrackTraceFilter {
+
+		private Set<String> packagePrefixes;
+
+		public PackageStrackTraceFilter(String... packagePrefixes) {
+			this.packagePrefixes = new HashSet<String>(Arrays.asList(packagePrefixes));
 		}
 
 		@Override
-		public void run() {
-			while (true) {
-				SystemUtils.sleep(getSecondsInterval() * 1000L);
-				SystemUtils.printAllStackTraces();
+		public boolean accept(Thread thread, StackTraceElement[] stackTrace) {
+			for (StackTraceElement elem : stackTrace) {
+				if (acceptClassName(elem.getClassName()))
+					return true;
 			}
+			return false;
 		}
 
-		private int getSecondsInterval() {
-			return secondsInterval;
+		private boolean acceptClassName(String className) {
+			for (String prefix : getPackagePrefixes()) {
+				if (className.startsWith(prefix))
+					return true;
+			}
+			return false;
+		}
+
+		private Set<String> getPackagePrefixes() {
+			return packagePrefixes;
 		}
 
 	}
