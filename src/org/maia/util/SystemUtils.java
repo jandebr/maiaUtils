@@ -75,7 +75,7 @@ public class SystemUtils {
 		printAllStackTraces(null);
 	}
 
-	public static void printAllStackTraces(StrackTraceFilter filter) {
+	public static void printAllStackTraces(StackTraceFilter filter) {
 		System.out.println("=== STACK TRACES >>");
 		Map<Thread, StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
 		for (Thread thread : stackTraces.keySet()) {
@@ -98,7 +98,7 @@ public class SystemUtils {
 		printAllStackTracesPeriodically(secondsInterval, null);
 	}
 
-	public static void printAllStackTracesPeriodically(int secondsInterval, StrackTraceFilter filter) {
+	public static void printAllStackTracesPeriodically(int secondsInterval, StackTraceFilter filter) {
 		Thread t = new Thread(new Runnable() {
 
 			@Override
@@ -113,17 +113,17 @@ public class SystemUtils {
 		t.start();
 	}
 
-	public static interface StrackTraceFilter {
+	public static interface StackTraceFilter {
 
 		boolean accept(Thread thread, StackTraceElement[] stackTrace);
 
 	}
 
-	public static class PackageStrackTraceFilter implements StrackTraceFilter {
+	public static class PackageStackTraceFilter implements StackTraceFilter {
 
 		private Set<String> packagePrefixes;
 
-		public PackageStrackTraceFilter(String... packagePrefixes) {
+		public PackageStackTraceFilter(String... packagePrefixes) {
 			this.packagePrefixes = new HashSet<String>(Arrays.asList(packagePrefixes));
 		}
 
